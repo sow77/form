@@ -1,1 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Formulario de Registro de Producción</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      padding: 0;
+      background-color: #f9f9f9;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    h2 {
+      color: #333;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      padding: 10px 15px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .section {
+      margin-top: 20px;
+      border-top: 1px solid #ddd;
+      padding-top: 20px;
+    }
+    .summary {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #f1f1f1;
+      border-radius: 4px;
+    }
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .checkbox-group label {
+      display: inline-flex;
+      align-items: center;
+      background-color: #e9ecef;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .checkbox-group input[type="checkbox"] {
+      margin-right: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Formulario de Registro de Producción</h2>
 
+    <!-- Login -->
+    <label>Nombre del Usuario:</label>
+    <select id="user">
+      <option value="">Seleccione un usuario</option>
+      <option value="Empleado 1">Empleado 1</option>
+      <option value="Empleado 2">Empleado 2</option>
+      <option value="Empleado 3">Empleado 3</option>
+    </select>
+
+    <label>Turno:</label>
+    <select id="shift">
+      <option value="">Seleccione un turno</option>
+      <option value="Mañana">Mañana</option>
+      <option value="Mañana (4 horas)">Mañana (4 horas)</option>
+      <option value="Tarde">Tarde</option>
+      <option value="Tarde (4 horas)">Tarde (4 horas)</option>
+    </select>
+
+    <label>Fecha:</label>
+    <input type="text" id="date" value="" readonly />
+
+    <!-- Selección de Áreas -->
+    <label>Áreas de Trabajo:</label>
+    <div class="checkbox-group" id="areas-checkboxes">
+      <label><input type="checkbox" value="Paquetería" /> Paquetería</label>
+      <label><input type="checkbox" value="Andorra" /> Andorra</label>
+      <label><input type="checkbox" value="Formateo" /> Formateo</label>
+      <label><input type="checkbox" value="IPC + NO IPC" /> IPC + NO IPC</label>
+      <label><input type="checkbox" value="Agrupaciones" /> Agrupaciones</label>
+      <label><input type="checkbox" value="Prime" /> Prime</label>
+      <label><input type="checkbox" value="Certificados" /> Certificados</label>
+      <label><input type="checkbox" value="Vuelos y Logística" /> Vuelos y Logística</label>
+      <label><input type="checkbox" value="Otras Funciones" /> Otras Funciones</label>
+    </div>
+
+    <!-- Contenedor Dinámico -->
+    <div id="dynamic-forms"></div>
+
+    <!-- Resumen -->
+    <div id="summary" class="summary" style="display: none;">
+      <h3>Resumen</h3>
+      <p><strong>Usuario:</strong> <span id="summary-user"></span></p>
+      <p><strong>Turno:</strong> <span id="summary-shift"></span></p>
+      <p><strong>Fecha:</strong> <span id="summary-date"></span></p>
+      <div id="summary-areas"></div>
+    </div>
+
+    <!-- Botón de Envío -->
+    <button id="submit-btn" disabled>Enviar</button>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const userSelect = document.getElementById('user');
+      const shiftSelect = document.getElementById('shift');
+      const dateInput = document.getElementById('date');
+      const areasContainer = document.getElementById('areas-checkboxes');
+      const dynamicFormsContainer = document.getElementById('dynamic-forms');
+      const summaryDiv = document.getElementById('summary');
+      const submitBtn = document.getElementById('submit-btn');
+
+      // Autocompletar fecha
+      dateInput.value = new Date().toLocaleDateString();
+
+      // Habilitar botón de envío si hay datos válidos
+      const validateForm = () => {
+        const selectedAreas = Array.from(areasContainer.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+        const isValid = userSelect.value && shiftSelect.value && selectedAreas.length > 0;
+        submitBtn.disabled = !isValid;
+      };
+
+      userSelect.addEventListener('change', validateForm);
+      shiftSelect.addEventListener('change', validateForm);
+
+      // Escuchar cambios en los checkboxes
+      areasContainer.addEventListener('change', () => {
+        validateForm();
+        renderDynamicForms();
+      });
+
+      // Renderizar formularios dinámicos
+      const renderDynamicForms = () => {
+        const selectedAreas = Array.from(areasContainer.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+        dynamicFormsContainer.innerHTML = '';
+
+        selectedAreas.forEach(area => {
+          const section = document.createElement('div');
+          section.className = 'section';
+          section.innerHTML = `<h3>${area}</h3>`;
+
+          if (area === 'Paquetería') {
+            section.innerHTML += `
+              <label>Tiempo - Readmisión:</label>
+              <input type="number" data-area="${area}" data-field="tiempo-readmision" />
+              <label>Tiempo - Cierre:</label>
+              <input type="number" data-area="${area}" data-field="tiempo-cierre" />
+              <label>Producto:</label>
+              <select data-area="${area}" data-field="producto">
+                <option value="">Seleccione un producto</option>
+                <option value="EMS">EMS</option>
+                <option value="Interconnect">Interconnect</option>
+                <option value="UPU Avión">UPU Avión</option>
+                <option value="Superficie">Superficie</option>
+              </select>
+              <label>Envíos Readmisión:</label>
+              <input type="number" data-area="${area}" data-field="envios-readmision" />
+              <label>Envíos Cierre:</label>
+              <input type="number" data-area="${area}" data-field="envios-cierre" />
+            `;
+          } else if (area === 'Andorra') {
+            section.innerHTML += `
+              <label>Tiempo:</label>
+              <input type="number" data-area="${area}" data-field="tiempo" />
+              <label>Clasificación Bandejas C:</label>
+              <input type="number" data-area="${area}" data-field="clasificacion-bandejas-c" />
+              <label>Envíos Cierre:</label>
+              <input type="number" data-area="${area}" data-field="envios-cierre" />
+            `;
+          } else {
+            section.innerHTML += `<p>No hay campos específicos para esta área.</p>`;
+          }
+
+          dynamicFormsContainer.appendChild(section);
+        });
+      };
+
+      // Manejar envío del formulario
+      submitBtn.addEventListener('click', () => {
+        const formData = {};
+        const inputs = dynamicFormsContainer.querySelectorAll('input, select');
+        inputs.forEach(input => {
+          const area = input.dataset.area;
+          const field = input.dataset.field;
+          if (!formData[area]) formData[area] = {};
+          formData[area][field] = input.value;
+        });
+
+        // Mostrar resumen
+        document.getElementById('summary-user').textContent = userSelect.value;
+        document.getElementById('summary-shift').textContent = shiftSelect.value;
+        document.getElementById('summary-date').textContent = dateInput.value;
+
+        const summaryAreas = document.getElementById('summary-areas');
+        summaryAreas.innerHTML = '';
+        Object.entries(formData).forEach(([area, data]) => {
+          const areaDiv = document.createElement('div');
+          areaDiv.innerHTML = `<h4>${area}</h4><pre>${JSON.stringify(data, null, 2)}</pre>`;
+          summaryAreas.appendChild(areaDiv);
+        });
+
+        summaryDiv.style.display = 'block';
+      });
+    });
+  </script>
+</body>
+</html>
